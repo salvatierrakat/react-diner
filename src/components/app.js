@@ -1,22 +1,26 @@
 import React, { useState, useEffect } from "react";
 import Menu from "./Menu";
 import Order from "./Order";
-//
 
 export default function App() {
   const [mainCourse, setMainCourse] = useState({ price: 0 });
   const [sideOne, setSideOne] = useState({ price: 0 });
   const [sideTwo, setSideTwo] = useState({ price: 0 });
   const [totalPrice, setTotalPrice] = useState(0);
-  const [choice, setChoice] = useState("");
   const [comment, setComment] = useState("");
-  const [clicks, setClicks] = useState(0);
+  const [clicked, setClicked] = useState([]);
 
-  const waitressComments = [
-    `That is a great choice! I love the ${choice.title}`,
-    `${choice.title} is really good!`,
-    `The ${choice.title} goes great with a drink!`,
-  ];
+  const generateComment = (title) => {
+    const waitressComments = [
+      `That is a great choice! I love the ${title}`,
+      `${title} is really good!`,
+      `The ${title} goes great with a drink!`,
+    ];
+
+    setComment(
+      waitressComments[Math.floor(Math.random() * waitressComments.length)]
+    );
+  };
 
   const selectFoodItem = (FoodItem) => {
     if (mainCourse.price === 0) {
@@ -26,8 +30,7 @@ export default function App() {
     } else if (sideTwo.price === 0) {
       setSideTwo(FoodItem);
     }
-    setClicks(clicks + 1);
-    setChoice(FoodItem);
+    setClicked([FoodItem.id, ...clicked]);
   };
 
   const calculateTotalPrice = () =>
@@ -35,18 +38,14 @@ export default function App() {
 
   useEffect(() => {
     setTotalPrice(calculateTotalPrice());
-    choice !== ""
-      ? setComment(
-          waitressComments[Math.ceil(Math.random() * waitressComments.length)]
-        )
-      : null;
-  }, [mainCourse, sideOne, sideTwo, comment, clicks]);
+  }, [mainCourse, sideOne, sideTwo, comment]);
 
   const resetItems = () => {
     setMainCourse({ price: 0 });
     setSideOne({ price: 0 });
     setSideTwo({ price: 0 });
-    setClicks(0);
+    setComment("");
+    setClicked([]);
   };
 
   return (
@@ -56,10 +55,21 @@ export default function App() {
         <Menu
           type={"breakfast"}
           selectFoodItem={selectFoodItem}
-          clicks={clicks}
+          generateComment={generateComment}
+          clicked={clicked}
         />
-        <Menu type={"lunch"} selectFoodItem={selectFoodItem} clicks={clicks} />
-        <Menu type={"dinner"} selectFoodItem={selectFoodItem} clicks={clicks} />
+        <Menu
+          type={"lunch"}
+          selectFoodItem={selectFoodItem}
+          generateComment={generateComment}
+          clicked={clicked}
+        />
+        <Menu
+          type={"dinner"}
+          selectFoodItem={selectFoodItem}
+          generateComment={generateComment}
+          clicked={clicked}
+        />
       </div>
       <Order
         totalPrice={totalPrice.toFixed(2)}
